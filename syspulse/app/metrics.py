@@ -12,7 +12,7 @@ def bytes_to_mb(b: int) -> float:
 
 
 def get_cpu_usage() -> float:
-    return psutil.cpu_percent()
+    return psutil.cpu_percent(None)
 
 
 def get_memory() -> dict[str, Any]:
@@ -30,7 +30,7 @@ def get_disk() -> dict[str, Any]:
     return {
         "total": bytes_to_gb(disk.total),
         "used": bytes_to_gb(disk.used),
-        "available": bytes_to_gb(disk.total - disk.used),
+        "available": bytes_to_gb(disk.free),
         "percent": disk.percent,
     }
 
