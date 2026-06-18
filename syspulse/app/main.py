@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -15,5 +15,5 @@ async def index():
 
 
 @app.websocket("/ws/monitor")
-async def websocket_endpoint(websocket):
+async def websocket_endpoint(websocket: WebSocket):
     await monitor_socket(websocket)
