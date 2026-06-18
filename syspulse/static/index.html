@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>SysPulse</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                background: #0f0f0f;
+                color: #e0e0e0;
+                font-family: monospace;
+                padding: 2rem;
+            }
+
+            h1 {
+                color: #00ff88;
+                margin-bottom: 2rem;
+                font-size: 1.8rem;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .card {
+                background: #1a1a1a;
+                border: 1px solid #2a2a2a;
+                border-radius: 8px;
+                padding: 1.5rem;
+            }
+
+            .card h2 {
+                color: #00ff88;
+                margin-bottom: 1rem;
+                font-size: 1rem;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+
+            .metric {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 0.5rem;
+                font-size: 0.9rem;
+            }
+
+            .metric span:last-child {
+                color: #00ff88;
+            }
+
+            .bar-container {
+                background: #2a2a2a;
+                border-radius: 4px;
+                height: 6px;
+                margin-top: 0.8rem;
+            }
+
+            .bar {
+                height: 6px;
+                border-radius: 4px;
+                background: #00ff88;
+                transition: width 0.5s ease;
+            }
+
+            .bar.warning {
+                background: #ffaa00;
+            }
+            .bar.danger {
+                background: #ff4444;
+            }
+
+            #status {
+                margin-bottom: 1rem;
+                font-size: 0.8rem;
+                color: #888;
+            }
+
+            #status.connected {
+                color: #00ff88;
+            }
+            #status.disconnected {
+                color: #ff4444;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>⚡ SysPulse</h1>
+        <p id="status">Connecting...</p>
+
+        <div class="grid">
+            <div class="card">
+                <h2>CPU</h2>
+                <div class="metric">
+                    <span>Usage</span>
+                    <span id="cpu-percent">--%</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar" id="cpu-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Memory</h2>
+                <div class="metric">
+                    <span>Used</span>
+                    <span id="ram-used">-- GB</span>
+                </div>
+                <div class="metric">
+                    <span>Total</span>
+                    <span id="ram-total">-- GB</span>
+                </div>
+                <div class="metric">
+                    <span>Usage</span>
+                    <span id="ram-percent">--%</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar" id="ram-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Disk</h2>
+                <div class="metric">
+                    <span>Used</span>
+                    <span id="disk-used">-- GB</span>
+                </div>
+                <div class="metric">
+                    <span>Total</span>
+                    <span id="disk-total">-- GB</span>
+                </div>
+                <div class="metric">
+                    <span>Usage</span>
+                    <span id="disk-percent">--%</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar" id="disk-bar" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Network</h2>
+                <div class="metric">
+                    <span>Sent</span>
+                    <span id="net-sent">-- MB</span>
+                </div>
+                <div class="metric">
+                    <span>Received</span>
+                    <span id="net-recv">-- MB</span>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const ws = new WebSocket("ws://localhost:8000/ws/monitor");
+            const status = document.getElementById("status");
+
+            ws.onopen = () => {
+                status.textContent = "● Connected";
+                status.className = "connected";
+            };
+
+            ws.onclose = () => {
+                status.textContent = "● Disconnected";
+                status.className = "disconnected";
+            };
+
+            function setBar(id, percent) {
+                const bar = document.getElementById(id);
+                bar.style.width = percent + "%";
+                bar.className = "bar";
+                if (percent > 80) bar.classList.add("danger");
+                else if (percent > 60) bar.classList.add("warning");
+            }
+
+            ws.onmessage = (event) => {
+                const d = JSON.parse(event.data);
+
+                document.getElementById("cpu-percent").textContent =
+                    d.cpu + "%";
+                setBar("cpu-bar", d.cpu);
+
+                document.getElementById("ram-used").textContent =
+                    d.memory.used + " GB";
+                document.getElementById("ram-total").textContent =
+                    d.memory.total + " GB";
+                document.getElementById("ram-percent").textContent =
+                    d.memory.percent + "%";
+                setBar("ram-bar", d.memory.percent);
+
+                document.getElementById("disk-used").textContent =
+                    d.disk.used + " GB";
+                document.getElementById("disk-total").textContent =
+                    d.disk.total + " GB";
+                document.getElementById("disk-percent").textContent =
+                    d.disk.percent + "%";
+                setBar("disk-bar", d.disk.percent);
+
+                document.getElementById("net-sent").textContent =
+                    d.network.mb_sent + " MB";
+                document.getElementById("net-recv").textContent =
+                    d.network.mb_received + " MB";
+            };
+        </script>
+    </body>
+</html>
