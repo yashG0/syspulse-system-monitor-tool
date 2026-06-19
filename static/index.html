@@ -1,331 +1,296 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>SysPulse</title>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SysPulse</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-            body {
-                background: #0d1117;
-                color: #cdd9e5;
-                font-family: "Courier New", monospace;
-                padding: 2rem;
-            }
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 1.5rem 2rem;
+        }
 
-            header {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                margin-bottom: 2rem;
-            }
+        header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #21262d;
+        }
 
-            header h1 {
-                font-size: 1.6rem;
-                color: #58a6ff;
-            }
+        h1 { font-size: 1.1rem; font-weight: 600; color: #58a6ff; letter-spacing: 0.5px; }
 
-            #status {
-                font-size: 0.75rem;
-                padding: 0.2rem 0.7rem;
-                border-radius: 20px;
-                background: #21262d;
-                color: #8b949e;
-            }
+        #status {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: #21262d;
+            color: #8b949e;
+            font-weight: 500;
+        }
+        #status.connected { background: #1a3a2a; color: #3fb950; }
+        #status.disconnected { background: #3a1a1a; color: #f85149; }
 
-            #status.connected {
-                background: #1a3a2a;
-                color: #3fb950;
-            }
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 1rem;
+        }
 
-            #status.disconnected {
-                background: #3a1a1a;
-                color: #f85149;
-            }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 1.2rem 1.4rem;
+        }
 
-            .grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1.2rem;
-            }
+        .card-head {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #58a6ff;
+            margin-bottom: 1rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid #21262d;
+        }
 
-            .card {
-                background: #161b22;
-                border: 1px solid #30363d;
-                border-radius: 10px;
-                padding: 1.4rem;
-            }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #161b22;
+        }
 
-            .card h2 {
-                color: #58a6ff;
-                font-size: 0.75rem;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                margin-bottom: 1rem;
-                border-bottom: 1px solid #21262d;
-                padding-bottom: 0.5rem;
-            }
+        .row:last-of-type { border-bottom: none; }
 
-            .metric {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 0.5rem;
-                font-size: 0.85rem;
-            }
+        .lbl { font-size: 13px; color: #8b949e; }
+        .val { font-size: 13px; font-weight: 600; color: #e6edf3; }
+        .val.warn { color: #d29922; }
+        .val.danger { color: #f85149; }
 
-            .metric .label {
-                color: #8b949e;
-            }
-            .metric .value {
-                color: #cdd9e5;
-                font-weight: bold;
-            }
+        .big-val {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #e6edf3;
+            line-height: 1;
+            margin: 0.5rem 0 0.2rem;
+        }
 
-            .bar-container {
-                background: #21262d;
-                border-radius: 4px;
-                height: 5px;
-                margin-top: 0.8rem;
-            }
+        .sub-val { font-size: 12px; color: #8b949e; margin-bottom: 0.8rem; }
 
-            .bar {
-                height: 5px;
-                border-radius: 4px;
-                background: #3fb950;
-                transition: width 0.8s ease;
-            }
+        .bar-wrap { background: #21262d; border-radius: 4px; height: 5px; margin: 8px 0 4px; }
+        .bar { height: 5px; border-radius: 4px; background: #3fb950; transition: width 1.2s ease; }
+        .bar.warn { background: #d29922; }
+        .bar.danger { background: #f85149; }
 
-            .bar.warning {
-                background: #d29922;
-            }
-            .bar.danger {
-                background: #f85149;
-            }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
-            /* Process table */
-            .card.full {
-                grid-column: span 2;
-            }
+        .metric-block { padding: 0.8rem; background: #0d1117; border-radius: 8px; }
+        .metric-label { font-size: 11px; color: #8b949e; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+        .metric-value { font-size: 1.4rem; font-weight: 700; color: #e6edf3; }
 
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 0.82rem;
-                table-layout: fixed;
-            }
+        .divider { border: none; border-top: 1px solid #21262d; margin: 1rem 0; }
 
-            thead tr {
-                color: #8b949e;
-                text-align: left;
-                border-bottom: 1px solid #30363d;
-            }
+        .cores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 0.8rem; }
+        .core { background: #0d1117; border-radius: 6px; padding: 6px 8px; }
+        .core-top { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+        .core-label { color: #8b949e; }
 
-            th,
-            td {
-                padding: 0.5rem 0.6rem;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
+        .span-full { grid-column: span 2; }
 
-            th:nth-child(1),
-            td:nth-child(1) {
-                width: 10%;
-            }
-            th:nth-child(2),
-            td:nth-child(2) {
-                width: 50%;
-            }
-            th:nth-child(3),
-            td:nth-child(3) {
-                width: 20%;
-            }
-            th:nth-child(4),
-            td:nth-child(4) {
-                width: 20%;
-            }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        thead th {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8b949e;
+            text-align: left;
+            padding: 0 0.5rem 0.6rem;
+            border-bottom: 1px solid #30363d;
+        }
+        tbody td {
+            font-size: 13px;
+            padding: 7px 0.5rem;
+            border-bottom: 1px solid #21262d;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: #1c2128; }
+        th:nth-child(1), td:nth-child(1) { width: 9%; color: #8b949e; }
+        th:nth-child(2), td:nth-child(2) { width: 47%; }
+        th:nth-child(3), td:nth-child(3) { width: 22%; }
+        th:nth-child(4), td:nth-child(4) { width: 22%; }
+    </style>
+</head>
+<body>
 
-            tbody tr {
-                border-bottom: 1px solid #21262d;
-                transition: background 0.2s;
-            }
+<header>
+    <h1>⚡ SysPulse</h1>
+    <span id="status">Connecting...</span>
+</header>
 
-            tbody tr:hover {
-                background: #21262d;
-            }
+<div class="layout">
 
-            td:nth-child(3) {
-                color: #58a6ff;
-            }
-            td:nth-child(4) {
-                color: #3fb950;
-            }
-        </style>
-    </head>
-    <body>
-        <header>
-            <h1>⚡ SysPulse</h1>
-            <span id="status">Connecting...</span>
-        </header>
+    <div class="card">
+        <div class="card-head">CPU</div>
+        <div class="big-val" id="cpu-percent">--%</div>
+        <div class="sub-val" id="cpu-sub">-- cores</div>
+        <div class="bar-wrap"><div class="bar" id="cpu-bar" style="width:0%"></div></div>
+        <div class="cores-grid" id="cpu-cores"></div>
+    </div>
 
-        <div class="grid">
-            <div class="card">
-                <h2>CPU</h2>
-                <div class="metric">
-                    <span class="label">Usage</span>
-                    <span class="value" id="cpu-percent">--%</span>
-                </div>
-                <div class="bar-container">
-                    <div class="bar" id="cpu-bar" style="width: 0%"></div>
-                </div>
+    <div class="card">
+        <div class="card-head">Memory</div>
+        <div class="big-val" id="ram-percent">--%</div>
+        <div class="sub-val" id="ram-sub">-- / -- GB</div>
+        <div class="bar-wrap"><div class="bar" id="ram-bar" style="width:0%"></div></div>
+        <hr class="divider">
+        <div class="two-col">
+            <div class="metric-block">
+                <div class="metric-label">Used</div>
+                <div class="metric-value" id="ram-used">--</div>
             </div>
-
-            <div class="card">
-                <h2>Memory</h2>
-                <div class="metric">
-                    <span class="label">Used</span>
-                    <span class="value" id="ram-used">-- GB</span>
-                </div>
-                <div class="metric">
-                    <span class="label">Total</span>
-                    <span class="value" id="ram-total">-- GB</span>
-                </div>
-                <div class="metric">
-                    <span class="label">Usage</span>
-                    <span class="value" id="ram-percent">--%</span>
-                </div>
-                <div class="bar-container">
-                    <div class="bar" id="ram-bar" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>Disk</h2>
-                <div class="metric">
-                    <span class="label">Used</span>
-                    <span class="value" id="disk-used">-- GB</span>
-                </div>
-                <div class="metric">
-                    <span class="label">Total</span>
-                    <span class="value" id="disk-total">-- GB</span>
-                </div>
-                <div class="metric">
-                    <span class="label">Usage</span>
-                    <span class="value" id="disk-percent">--%</span>
-                </div>
-                <div class="bar-container">
-                    <div class="bar" id="disk-bar" style="width: 0%"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>Network</h2>
-                <div class="metric">
-                    <span class="label">Sent</span>
-                    <span class="value" id="net-sent">-- MB</span>
-                </div>
-                <div class="metric">
-                    <span class="label">Received</span>
-                    <span class="value" id="net-recv">-- MB</span>
-                </div>
-            </div>
-
-            <div class="card full">
-                <h2>Top Processes</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>PID</th>
-                            <th>Name</th>
-                            <th>CPU %</th>
-                            <th>MEM %</th>
-                        </tr>
-                    </thead>
-                    <tbody id="process-table"></tbody>
-                </table>
+            <div class="metric-block">
+                <div class="metric-label">Available</div>
+                <div class="metric-value" id="ram-avail">--</div>
             </div>
         </div>
+        <hr class="divider">
+        <div class="card-head" style="margin-top:0">Network</div>
+        <div class="two-col">
+            <div class="metric-block">
+                <div class="metric-label">Sent</div>
+                <div class="metric-value" id="net-sent">--</div>
+            </div>
+            <div class="metric-block">
+                <div class="metric-label">Received</div>
+                <div class="metric-value" id="net-recv">--</div>
+            </div>
+        </div>
+    </div>
 
-        <script>
-            const ws = new WebSocket("ws://localhost:8000/ws/monitor");
-            const status = document.getElementById("status");
+    <div class="card">
+        <div class="card-head">Disk</div>
+        <div class="big-val" id="disk-percent">--%</div>
+        <div class="sub-val" id="disk-sub">-- / -- GB</div>
+        <div class="bar-wrap"><div class="bar" id="disk-bar" style="width:0%"></div></div>
+        <hr class="divider">
+        <div class="two-col">
+            <div class="metric-block">
+                <div class="metric-label">Used</div>
+                <div class="metric-value" id="disk-used">--</div>
+            </div>
+            <div class="metric-block">
+                <div class="metric-label">Free</div>
+                <div class="metric-value" id="disk-free">--</div>
+            </div>
+        </div>
+    </div>
 
-            ws.onopen = () => {
-                status.textContent = "● Connected";
-                status.className = "connected";
-            };
+    <div class="card span-full">
+        <div class="card-head">Top Processes</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>PID</th>
+                    <th>Name</th>
+                    <th>CPU %</th>
+                    <th>MEM %</th>
+                </tr>
+            </thead>
+            <tbody id="process-table"></tbody>
+        </table>
+    </div>
 
-            ws.onclose = () => {
-                status.textContent = "● Disconnected";
-                status.className = "disconnected";
-            };
+</div>
 
-            function colorValue(id, value, threshold = 80) {
-                const el = document.getElementById(id);
-                el.style.color = value >= threshold ? "#f85149" : "#cdd9e5";
-            }
+<script>
+    const ws = new WebSocket("ws://localhost:8000/ws/monitor");
+    const status = document.getElementById("status");
 
-            function setBar(id, percent) {
-                const bar = document.getElementById(id);
-                bar.style.width = percent + "%";
-                bar.className = "bar";
-                if (percent > 80) bar.classList.add("danger");
-                else if (percent > 60) bar.classList.add("warning");
-            }
+    ws.onopen = () => { status.textContent = "● Live"; status.className = "connected"; };
+    ws.onclose = () => { status.textContent = "● Offline"; status.className = "disconnected"; };
 
-            ws.onmessage = (event) => {
-                const d = JSON.parse(event.data);
+    function setBar(id, pct) {
+        const b = document.getElementById(id);
+        b.style.width = Math.min(pct, 100) + "%";
+        b.className = "bar" + (pct > 80 ? " danger" : pct > 60 ? " warn" : "");
+    }
 
-                document.getElementById("cpu-percent").textContent =
-                    d.cpu + "%";
-                colorValue("cpu-percent", d.cpu);
-                setBar("cpu-bar", d.cpu);
+    function applyColor(el, val, t=80) {
+        el.className = "big-val" + (val >= t ? " danger" : val >= 60 ? " warn" : "");
+    }
 
-                document.getElementById("ram-used").textContent =
-                    d.memory.used + " GB";
-                document.getElementById("ram-total").textContent =
-                    d.memory.total + " GB";
-                document.getElementById("ram-percent").textContent =
-                    d.memory.percent + "%";
-                setBar("ram-bar", d.memory.percent);
-                colorValue("ram-percent", d.memory.percent);
+    ws.onmessage = (event) => {
+        const d = JSON.parse(event.data);
 
-                document.getElementById("disk-used").textContent =
-                    d.disk.used + " GB";
-                document.getElementById("disk-total").textContent =
-                    d.disk.total + " GB";
-                document.getElementById("disk-percent").textContent =
-                    d.disk.percent + "%";
-                setBar("disk-bar", d.disk.percent);
-                colorValue("disk-percent", d.disk.percent);
+        const cpuEl = document.getElementById("cpu-percent");
+        cpuEl.textContent = d.cpu.overall + "%";
+        applyColor(cpuEl, d.cpu.overall);
+        document.getElementById("cpu-sub").textContent = d.cpu.count + " logical cores";
+        setBar("cpu-bar", d.cpu.overall);
 
-                document.getElementById("net-sent").textContent =
-                    d.network.mb_sent + " MB";
-                document.getElementById("net-recv").textContent =
-                    d.network.mb_received + " MB";
+        const coresDiv = document.getElementById("cpu-cores");
+        coresDiv.innerHTML = "";
+        d.cpu.cores.forEach((pct, i) => {
+            const c = pct >= 80 ? "#f85149" : pct >= 60 ? "#d29922" : "#3fb950";
+            coresDiv.innerHTML += `
+                <div class="core">
+                    <div class="core-top">
+                        <span class="core-label">Core ${i}</span>
+                        <span style="color:${c};font-weight:600">${pct}%</span>
+                    </div>
+                    <div class="bar-wrap" style="margin:0">
+                        <div class="bar" style="width:${Math.min(pct,100)}%;background:${c}"></div>
+                    </div>
+                </div>`;
+        });
 
-                const tbody = document.getElementById("process-table");
-                tbody.innerHTML = "";
-                d.processes.forEach((p) => {
-                    const cpuColor =
-                        p.cpu_percent >= 80 ? "#f85149" : "#58a6ff";
-                    const memColor =
-                        p.memory_percent >= 80 ? "#f85149" : "#3fb950";
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
+        const ramEl = document.getElementById("ram-percent");
+        ramEl.textContent = d.memory.percent + "%";
+        applyColor(ramEl, d.memory.percent);
+        document.getElementById("ram-sub").textContent = d.memory.used + " / " + d.memory.total + " GB";
+        document.getElementById("ram-used").textContent = d.memory.used + " GB";
+        document.getElementById("ram-avail").textContent = d.memory.available + " GB";
+        setBar("ram-bar", d.memory.percent);
+
+        const diskEl = document.getElementById("disk-percent");
+        diskEl.textContent = d.disk.percent + "%";
+        applyColor(diskEl, d.disk.percent);
+        document.getElementById("disk-sub").textContent = d.disk.used + " / " + d.disk.total + " GB";
+        document.getElementById("disk-used").textContent = d.disk.used + " GB";
+        document.getElementById("disk-free").textContent = d.disk.available + " GB";
+        setBar("disk-bar", d.disk.percent);
+
+        document.getElementById("net-sent").textContent = d.network.mb_sent + " MB";
+        document.getElementById("net-recv").textContent = d.network.mb_received + " MB";
+
+        const tbody = document.getElementById("process-table");
+        tbody.innerHTML = "";
+        d.processes.forEach(p => {
+            const cc = p.cpu_percent >= 80 ? "#f85149" : p.cpu_percent >= 60 ? "#d29922" : "#58a6ff";
+            const mc = p.memory_percent >= 80 ? "#f85149" : p.memory_percent >= 60 ? "#d29922" : "#3fb950";
+            tbody.innerHTML += `<tr>
                 <td>${p.pid}</td>
                 <td>${p.name}</td>
-                <td style="color:${cpuColor}">${p.cpu_percent}%</td>
-                <td style="color:${memColor}">${p.memory_percent}%</td>
-            `;
-                    tbody.appendChild(row);
-                });
-            };
-        </script>
-    </body>
+                <td style="color:${cc};font-weight:600">${p.cpu_percent}%</td>
+                <td style="color:${mc};font-weight:600">${p.memory_percent}%</td>
+            </tr>`;
+        });
+    };
+</script>
+</body>
 </html>
