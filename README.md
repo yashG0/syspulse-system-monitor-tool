@@ -1,126 +1,154 @@
 # ⚡ SysPulse
 
-Real-time system monitoring tool that streams live CPU, RAM, disk, and network
-metrics to your browser via WebSockets.
+Real-time system monitoring dashboard built with FastAPI, WebSockets, and psutil.
 
-![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.137-green?logo=fastapi)
-![WebSockets](https://img.shields.io/badge/WebSockets-live-orange)
-![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)
+Streams live CPU, memory, disk, network, and process metrics directly to your browser with real-time updates.
+
+![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green?logo=fastapi)
+![WebSocket](https://img.shields.io/badge/WebSocket-Live-orange)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)
 
 ---
 
-## What It Does
+## 📸 Screenshots
 
-- Streams live system metrics every second via WebSocket
-- Displays CPU, RAM, disk, and network usage in a clean dashboard
-- Color-coded progress bars — green → yellow → red as usage increases
-- Handles multiple concurrent clients independently
-- Runs entirely on localhost — no cloud, no account, no setup
+### Dashboard Overview
+
+![SysPulse Dashboard](screenshots/dashboard-overview.png)
+
+### Process Monitoring
+
+![SysPulse Processes](screenshots/process-monitor.png)
+
+---
+
+## Features
+
+* Real-time CPU monitoring
+* Per-core CPU utilization
+* Memory usage statistics
+* Disk usage statistics
+* Network traffic monitoring
+* Top processes by CPU and memory usage
+* Live WebSocket updates
+* Responsive dashboard UI
+* Docker / Podman support
 
 ---
 
 ## Tech Stack
 
-| Layer      | Technology        |
-|------------|-------------------|
-| Backend    | FastAPI, Python   |
-| Real-time  | WebSockets        |
-| Metrics    | psutil            |
-| Frontend   | Vanilla JS, HTML  |
-| Container  | Docker            |
+| Layer            | Technology            |
+| ---------------- | --------------------- |
+| Backend          | FastAPI               |
+| Runtime          | Python                |
+| Real-Time        | WebSockets            |
+| Metrics          | psutil                |
+| Frontend         | HTML, CSS, JavaScript |
+| Containerization | Docker, Podman        |
 
 ---
 
 ## Quick Start
 
-### With Docker
-```bash
-docker run -p 8000:8000 yashg0/syspulse
-```
-Open `http://localhost:8000`
+### Docker
 
-### Without Docker
 ```bash
-git clone https://github.com/yashg0/syspulse
-cd syspulse
-uv sync
-uv run uvicorn app.main:app --reload
+docker run -p 8000:8000 yashg0/syspulse:latest
 ```
-Open `http://localhost:8000`
+
+### Podman
+
+```bash
+podman run -p 8000:8000 docker.io/yashg0/syspulse:latest
+```
+
+Open:
+
+```text
+http://localhost:8000
+```
 
 ---
 
-## Project Structure
-syspulse/
+## Local Development
 
-├── app/
+```bash
+git clone https://github.com/yashg0/syspulse.git
 
-│   ├── main.py       # FastAPI app, routes
+cd syspulse
 
-│   ├── metrics.py    # psutil metric collection
+uv sync
 
-│   └── ws.py         # WebSocket handler
-
-├── static/
-
-│   └── index.html    # dashboard UI
-
-├── tests/
-
-│   └── test_metrics.py
-
-├── Dockerfile
-
-└── README.md
+uv run uvicorn app.main:app --reload
+```
 
 ---
 
 ## API
 
-| Method    | Endpoint      | Description              |
-|-----------|---------------|--------------------------|
-| GET       | `/`           | Serve dashboard          |
-| WebSocket | `/ws/monitor` | Stream live metrics      |
+| Method    | Endpoint      | Description         |
+| --------- | ------------- | ------------------- |
+| GET       | `/`           | Dashboard UI        |
+| WebSocket | `/ws/monitor` | Live metrics stream |
 
 ---
 
-## Metrics Payload
+## Project Structure
 
-```json
-{
-  "cpu": 23.4,
-  "memory": {
-    "total": 15.01,
-    "used": 4.55,
-    "available": 10.46,
-    "percent": 30.3
-  },
-  "disk": {
-    "total": 463.17,
-    "used": 53.55,
-    "available": 409.62,
-    "percent": 11.6
-  },
-  "network": {
-    "mb_sent": 45.75,
-    "mb_received": 524.11
-  }
-}
+```text
+syspulse/
+├── app/
+│   ├── main.py
+│   ├── metrics.py
+│   └── ws.py
+├── static/
+│   └── index.html
+├── screenshots/
+│   ├── i1.png
+│   └── i2.png
+├── tests/
+│   └── test_metrics.py
+├── Dockerfile
+├── pyproject.toml
+├── uv.lock
+└── README.md
 ```
 
 ---
 
 ## Roadmap
 
-- [x] V1 — CPU, RAM, disk, network via WebSocket
-- [ ] V2 — Top processes by CPU and memory
-- [ ] V3 — Docker/Podman container monitoring
-- [ ] V4 — Alert system (CPU > 90% → notify)
-- [ ] V5 — Historical snapshots with PostgreSQL
+* [x] CPU Monitoring
+* [x] Memory Monitoring
+* [x] Disk Monitoring
+* [x] Network Monitoring
+* [x] Process Monitoring
+* [x] Docker Image
+* [ ] Historical Metrics Storage
+* [ ] Alert System
+* [ ] GPU Monitoring
+* [ ] Container Monitoring
+
+---
+
+## Docker Hub
+
+```bash
+docker pull yashg0/syspulse:latest
+```
+
+Docker Hub:
+https://hub.docker.com/r/yashg0/syspulse
 
 ---
 
 ## Author
 
-**Yash G** — [github.com/yashg0](https://github.com/yashg0)
+**Yash G**
+
+GitHub:
+https://github.com/yashg0
+
+MIT License
