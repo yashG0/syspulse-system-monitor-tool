@@ -12,6 +12,8 @@ async def monitor_socket(websocket: WebSocket):
         while True:
             metrics = get_all_metrics()
             await websocket.send_text(json.dumps(metrics))
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
     except WebSocketDisconnect:
         print("Client disconnected")
+    except Exception as e:
+        print(f"Error: {e}")

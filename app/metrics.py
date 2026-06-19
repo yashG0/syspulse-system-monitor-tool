@@ -12,7 +12,7 @@ def bytes_to_mb(b: int) -> float:
 
 
 def get_cpu_usage() -> float:
-    return psutil.cpu_percent(None)
+    return round(psutil.cpu_percent(None) / psutil.cpu_count(), 2)
 
 
 def get_memory() -> dict[str, Any]:
@@ -43,10 +43,32 @@ def get_network() -> dict[str, Any]:
     }
 
 
+cpu_count = psutil.cpu_count()
+
+
+def get_top_processes(limit: int = 10) -> list[dict[str, Any]]:
+    processes = []
+    for proc in psutil.process_iter(["pid", "name", "cpu_percent", "memory_percent"]):
+        try:
+            processes.append(
+                {
+                    "pid": proc.info["pid"],
+                    "name": proc.info["name"],
+                    "cpu_percent": round(proc.info["cpu_percent"] / cpu_count, 2),
+                    "memory_percent": round(proc.info["memory_percent"], 2),
+                }
+            )
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+
+    return sorted(processes, key=lambda x: x["cpu_percent"], reverse=True)[:limit]
+
+
 def get_all_metrics() -> dict[str, Any]:
     return {
         "cpu": get_cpu_usage(),
         "memory": get_memory(),
         "disk": get_disk(),
         "network": get_network(),
+        "processes": get_top_processes(),
     }

@@ -12,95 +12,173 @@
             }
 
             body {
-                background: #0f0f0f;
-                color: #e0e0e0;
-                font-family: monospace;
+                background: #0d1117;
+                color: #cdd9e5;
+                font-family: "Courier New", monospace;
                 padding: 2rem;
             }
 
-            h1 {
-                color: #00ff88;
+            header {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
                 margin-bottom: 2rem;
-                font-size: 1.8rem;
+            }
+
+            header h1 {
+                font-size: 1.6rem;
+                color: #58a6ff;
+            }
+
+            #status {
+                font-size: 0.75rem;
+                padding: 0.2rem 0.7rem;
+                border-radius: 20px;
+                background: #21262d;
+                color: #8b949e;
+            }
+
+            #status.connected {
+                background: #1a3a2a;
+                color: #3fb950;
+            }
+
+            #status.disconnected {
+                background: #3a1a1a;
+                color: #f85149;
             }
 
             .grid {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
-                gap: 1.5rem;
+                gap: 1.2rem;
             }
 
             .card {
-                background: #1a1a1a;
-                border: 1px solid #2a2a2a;
-                border-radius: 8px;
-                padding: 1.5rem;
+                background: #161b22;
+                border: 1px solid #30363d;
+                border-radius: 10px;
+                padding: 1.4rem;
             }
 
             .card h2 {
-                color: #00ff88;
-                margin-bottom: 1rem;
-                font-size: 1rem;
+                color: #58a6ff;
+                font-size: 0.75rem;
                 text-transform: uppercase;
                 letter-spacing: 2px;
+                margin-bottom: 1rem;
+                border-bottom: 1px solid #21262d;
+                padding-bottom: 0.5rem;
             }
 
             .metric {
                 display: flex;
                 justify-content: space-between;
                 margin-bottom: 0.5rem;
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
 
-            .metric span:last-child {
-                color: #00ff88;
+            .metric .label {
+                color: #8b949e;
+            }
+            .metric .value {
+                color: #cdd9e5;
+                font-weight: bold;
             }
 
             .bar-container {
-                background: #2a2a2a;
+                background: #21262d;
                 border-radius: 4px;
-                height: 6px;
+                height: 5px;
                 margin-top: 0.8rem;
             }
 
             .bar {
-                height: 6px;
+                height: 5px;
                 border-radius: 4px;
-                background: #00ff88;
-                transition: width 0.5s ease;
+                background: #3fb950;
+                transition: width 0.8s ease;
             }
 
             .bar.warning {
-                background: #ffaa00;
+                background: #d29922;
             }
             .bar.danger {
-                background: #ff4444;
+                background: #f85149;
             }
 
-            #status {
-                margin-bottom: 1rem;
-                font-size: 0.8rem;
-                color: #888;
+            /* Process table */
+            .card.full {
+                grid-column: span 2;
             }
 
-            #status.connected {
-                color: #00ff88;
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 0.82rem;
+                table-layout: fixed;
             }
-            #status.disconnected {
-                color: #ff4444;
+
+            thead tr {
+                color: #8b949e;
+                text-align: left;
+                border-bottom: 1px solid #30363d;
+            }
+
+            th,
+            td {
+                padding: 0.5rem 0.6rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            th:nth-child(1),
+            td:nth-child(1) {
+                width: 10%;
+            }
+            th:nth-child(2),
+            td:nth-child(2) {
+                width: 50%;
+            }
+            th:nth-child(3),
+            td:nth-child(3) {
+                width: 20%;
+            }
+            th:nth-child(4),
+            td:nth-child(4) {
+                width: 20%;
+            }
+
+            tbody tr {
+                border-bottom: 1px solid #21262d;
+                transition: background 0.2s;
+            }
+
+            tbody tr:hover {
+                background: #21262d;
+            }
+
+            td:nth-child(3) {
+                color: #58a6ff;
+            }
+            td:nth-child(4) {
+                color: #3fb950;
             }
         </style>
     </head>
     <body>
-        <h1>⚡ SysPulse</h1>
-        <p id="status">Connecting...</p>
+        <header>
+            <h1>⚡ SysPulse</h1>
+            <span id="status">Connecting...</span>
+        </header>
 
         <div class="grid">
             <div class="card">
                 <h2>CPU</h2>
                 <div class="metric">
-                    <span>Usage</span>
-                    <span id="cpu-percent">--%</span>
+                    <span class="label">Usage</span>
+                    <span class="value" id="cpu-percent">--%</span>
                 </div>
                 <div class="bar-container">
                     <div class="bar" id="cpu-bar" style="width: 0%"></div>
@@ -110,16 +188,16 @@
             <div class="card">
                 <h2>Memory</h2>
                 <div class="metric">
-                    <span>Used</span>
-                    <span id="ram-used">-- GB</span>
+                    <span class="label">Used</span>
+                    <span class="value" id="ram-used">-- GB</span>
                 </div>
                 <div class="metric">
-                    <span>Total</span>
-                    <span id="ram-total">-- GB</span>
+                    <span class="label">Total</span>
+                    <span class="value" id="ram-total">-- GB</span>
                 </div>
                 <div class="metric">
-                    <span>Usage</span>
-                    <span id="ram-percent">--%</span>
+                    <span class="label">Usage</span>
+                    <span class="value" id="ram-percent">--%</span>
                 </div>
                 <div class="bar-container">
                     <div class="bar" id="ram-bar" style="width: 0%"></div>
@@ -129,16 +207,16 @@
             <div class="card">
                 <h2>Disk</h2>
                 <div class="metric">
-                    <span>Used</span>
-                    <span id="disk-used">-- GB</span>
+                    <span class="label">Used</span>
+                    <span class="value" id="disk-used">-- GB</span>
                 </div>
                 <div class="metric">
-                    <span>Total</span>
-                    <span id="disk-total">-- GB</span>
+                    <span class="label">Total</span>
+                    <span class="value" id="disk-total">-- GB</span>
                 </div>
                 <div class="metric">
-                    <span>Usage</span>
-                    <span id="disk-percent">--%</span>
+                    <span class="label">Usage</span>
+                    <span class="value" id="disk-percent">--%</span>
                 </div>
                 <div class="bar-container">
                     <div class="bar" id="disk-bar" style="width: 0%"></div>
@@ -148,13 +226,28 @@
             <div class="card">
                 <h2>Network</h2>
                 <div class="metric">
-                    <span>Sent</span>
-                    <span id="net-sent">-- MB</span>
+                    <span class="label">Sent</span>
+                    <span class="value" id="net-sent">-- MB</span>
                 </div>
                 <div class="metric">
-                    <span>Received</span>
-                    <span id="net-recv">-- MB</span>
+                    <span class="label">Received</span>
+                    <span class="value" id="net-recv">-- MB</span>
                 </div>
+            </div>
+
+            <div class="card full">
+                <h2>Top Processes</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PID</th>
+                            <th>Name</th>
+                            <th>CPU %</th>
+                            <th>MEM %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="process-table"></tbody>
+                </table>
             </div>
         </div>
 
@@ -172,6 +265,11 @@
                 status.className = "disconnected";
             };
 
+            function colorValue(id, value, threshold = 80) {
+                const el = document.getElementById(id);
+                el.style.color = value >= threshold ? "#f85149" : "#cdd9e5";
+            }
+
             function setBar(id, percent) {
                 const bar = document.getElementById(id);
                 bar.style.width = percent + "%";
@@ -185,6 +283,7 @@
 
                 document.getElementById("cpu-percent").textContent =
                     d.cpu + "%";
+                colorValue("cpu-percent", d.cpu);
                 setBar("cpu-bar", d.cpu);
 
                 document.getElementById("ram-used").textContent =
@@ -194,6 +293,7 @@
                 document.getElementById("ram-percent").textContent =
                     d.memory.percent + "%";
                 setBar("ram-bar", d.memory.percent);
+                colorValue("ram-percent", d.memory.percent);
 
                 document.getElementById("disk-used").textContent =
                     d.disk.used + " GB";
@@ -202,11 +302,29 @@
                 document.getElementById("disk-percent").textContent =
                     d.disk.percent + "%";
                 setBar("disk-bar", d.disk.percent);
+                colorValue("disk-percent", d.disk.percent);
 
                 document.getElementById("net-sent").textContent =
                     d.network.mb_sent + " MB";
                 document.getElementById("net-recv").textContent =
                     d.network.mb_received + " MB";
+
+                const tbody = document.getElementById("process-table");
+                tbody.innerHTML = "";
+                d.processes.forEach((p) => {
+                    const cpuColor =
+                        p.cpu_percent >= 80 ? "#f85149" : "#58a6ff";
+                    const memColor =
+                        p.memory_percent >= 80 ? "#f85149" : "#3fb950";
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                <td>${p.pid}</td>
+                <td>${p.name}</td>
+                <td style="color:${cpuColor}">${p.cpu_percent}%</td>
+                <td style="color:${memColor}">${p.memory_percent}%</td>
+            `;
+                    tbody.appendChild(row);
+                });
             };
         </script>
     </body>
