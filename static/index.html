@@ -246,7 +246,7 @@
                     <div class="cores-grid" id="cpu-cores"></div>
                 </div>
 
-                <div class="card" style="flex: 1;">
+                <div class="card" style="flex: 1">
                     <div class="card-head">Disk</div>
                     <div class="big-val" id="disk-percent">--%</div>
                     <div class="sub-val" id="disk-sub">-- / -- GB</div>
@@ -337,8 +337,7 @@
                                 id="net-graph"
                                 style="
                                     width: 100%;
-                                    flex: 1;
-                                    min-height: 120px;
+                                    height: 160px;
                                     border-radius: 6px;
                                     background: #0d1117;
                                 "
@@ -407,32 +406,84 @@
                     ...downloadHistory,
                     1,
                 );
+                const padding = { top: 10, right: 8, bottom: 24, left: 42 };
+                const gw = w - padding.left - padding.right;
+                const gh = h - padding.top - padding.bottom;
 
+                // grid lines
+                [0, 0.25, 0.5, 0.75, 1].forEach((ratio) => {
+                    const y = padding.top + gh * (1 - ratio);
+                    ctx.beginPath();
+                    ctx.strokeStyle = "#21262d";
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([4, 4]);
+                    ctx.moveTo(padding.left, y);
+                    ctx.lineTo(padding.left + gw, y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // y-axis labels
+                    const val = (maxVal * ratio).toFixed(1);
+                    ctx.fillStyle = "#484f58";
+                    ctx.font = "9px sans-serif";
+                    ctx.textAlign = "right";
+                    ctx.fillText(val, padding.left - 4, y + 3);
+                });
+
+                // x-axis labels
+                ctx.textAlign = "center";
+                ctx.fillStyle = "#484f58";
+                ctx.font = "9px sans-serif";
+                ["30s", "20s", "10s", "now"].forEach((label, i) => {
+                    const x = padding.left + (i / 3) * gw;
+                    ctx.fillText(label, x, h - 6);
+                });
+
+                // draw line with smooth curve
                 function drawLine(data, color) {
                     ctx.beginPath();
                     ctx.strokeStyle = color;
                     ctx.lineWidth = 1.5;
+                    ctx.lineJoin = "round";
+
                     data.forEach((val, i) => {
-                        const x = (i / (data.length - 1)) * w;
-                        const y = h - (val / maxVal) * (h - 10);
+                        const x = padding.left + (i / (data.length - 1)) * gw;
+                        const y = padding.top + gh - (val / maxVal) * gh;
                         i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
                     });
                     ctx.stroke();
-                    ctx.lineTo(w, h);
-                    ctx.lineTo(0, h);
+
+                    // fill area
+                    const lastX = padding.left + gw;
+                    const lastY =
+                        padding.top +
+                        gh -
+                        (data[data.length - 1] / maxVal) * gh;
+                    ctx.lineTo(lastX, padding.top + gh);
+                    ctx.lineTo(padding.left, padding.top + gh);
                     ctx.closePath();
-                    ctx.fillStyle = color + "22";
+                    ctx.fillStyle = color + "18";
                     ctx.fill();
                 }
 
                 drawLine(uploadHistory, "#58a6ff");
                 drawLine(downloadHistory, "#3fb950");
 
+                // legend top right
+                ctx.textAlign = "right";
                 ctx.font = "10px sans-serif";
                 ctx.fillStyle = "#58a6ff";
-                ctx.fillText("↑ Upload", 6, 12);
+                ctx.fillText(
+                    `↑ ${uploadHistory[uploadHistory.length - 1]} KB/s`,
+                    w - padding.right,
+                    padding.top + 10,
+                );
                 ctx.fillStyle = "#3fb950";
-                ctx.fillText("↓ Download", 6, 24);
+                ctx.fillText(
+                    `↓ ${downloadHistory[downloadHistory.length - 1]} KB/s`,
+                    w - padding.right,
+                    padding.top + 22,
+                );
             }
 
             ws.onmessage = (event) => {
