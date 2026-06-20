@@ -21,8 +21,13 @@ def test_bytes_to_mb():
 
 def test_cpu_usage():
     cpu = get_cpu_usage()
-    assert isinstance(cpu, float)
-    assert 0.0 <= cpu <= 100.0
+    assert isinstance(cpu, dict)
+    assert "overall" in cpu
+    assert "cores" in cpu
+    assert "count" in cpu
+    assert 0.0 <= cpu["overall"] <= 100.0
+    assert isinstance(cpu["cores"], list)
+    assert len(cpu["cores"]) > 0
 
 
 def test_memory():
@@ -46,6 +51,8 @@ def test_network():
     net = get_network()
     assert "mb_sent" in net
     assert "mb_received" in net
+    assert "upload_kb" in net
+    assert "download_kb" in net
 
 
 def test_all_metrics_keys():
@@ -54,3 +61,14 @@ def test_all_metrics_keys():
     assert "memory" in metrics
     assert "disk" in metrics
     assert "network" in metrics
+    assert "system" in metrics
+    assert "processes" in metrics
+
+
+def test_system_info():
+    from app.metrics import get_system_info
+    info = get_system_info()
+    assert "hostname" in info
+    assert "os" in info
+    assert "uptime" in info
+    assert len(info["hostname"]) > 0
