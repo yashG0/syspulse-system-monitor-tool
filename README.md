@@ -1,52 +1,25 @@
 # ⚡ SysPulse
 
 Real-time system monitoring dashboard built with FastAPI, WebSockets, and psutil.
+Streams live CPU, memory, disk, network, and process metrics directly to your browser — updated every 3 seconds.
 
-Streams live CPU, memory, disk, network, and process metrics directly to your browser with real-time updates.
-
-![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)
+![Python](https://img.shields.io/badge/Python-3.14-blue?logo=python)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green?logo=fastapi)
 ![WebSocket](https://img.shields.io/badge/WebSocket-Live-orange)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)
 
 ---
 
-## 📸 Screenshots
-
-### Dashboard Overview
-
-![SysPulse Dashboard](screenshots/dashboard-overview.png)
-
-### Process Monitoring
-
-![SysPulse Processes](screenshots/process-monitor.png)
-
----
-
 ## Features
 
-* Real-time CPU monitoring
-* Per-core CPU utilization
-* Memory usage statistics
-* Disk usage statistics
-* Network traffic monitoring
-* Top processes by CPU and memory usage
-* Live WebSocket updates
-* Responsive dashboard UI
-* Docker / Podman support
-
----
-
-## Tech Stack
-
-| Layer            | Technology            |
-| ---------------- | --------------------- |
-| Backend          | FastAPI               |
-| Runtime          | Python                |
-| Real-Time        | WebSockets            |
-| Metrics          | psutil                |
-| Frontend         | HTML, CSS, JavaScript |
-| Containerization | Docker, Podman        |
+- Real-time CPU monitoring — overall usage + per-core breakdown
+- Memory usage — used, available, percentage
+- Disk usage — used, free, percentage
+- Network monitoring — live upload/download KB/s + 30s history graph
+- Top 10 processes by CPU with color-coded thresholds
+- System info — hostname, OS, uptime
+- Color-coded alerts — green → yellow → red as usage increases
+- Single Docker command — no setup, no account, no cloud
 
 ---
 
@@ -55,81 +28,119 @@ Streams live CPU, memory, disk, network, and process metrics directly to your br
 ### Docker
 
 ```bash
-docker run -p 8000:8000 yashg0/syspulse:latest
+docker run --pid=host --network=host yashg0/syspulse:latest
 ```
 
 ### Podman
 
 ```bash
-podman run -p 8000:8000 docker.io/yashg0/syspulse:latest
+podman run --pid=host --network=host docker.io/yashg0/syspulse:latest
 ```
 
-Open:
+Open `http://localhost:8000`
 
-```text
-http://localhost:8000
-```
+> `--pid=host` gives access to host process list
+> `--network=host` gives access to host network stats
+> Without these flags, metrics show container internals instead of your machine
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | FastAPI |
+| Runtime | Python 3.14 |
+| Real-time | WebSockets, asyncio |
+| Metrics | psutil |
+| Frontend | Vanilla HTML, CSS, JavaScript |
+| Charts | HTML5 Canvas |
+| Containerization | Docker, Podman |
+| Packaging | uv |
+| Testing | pytest |
 
 ---
 
 ## Local Development
 
 ```bash
-git clone https://github.com/yashg0/syspulse.git
-
-cd syspulse
-
+git clone https://github.com/yashg0/syspulse-system-monitor-tool
+cd syspulse-system-monitor-tool/syspulse
 uv sync
-
 uv run uvicorn app.main:app --reload
 ```
+
+Open `http://localhost:8000`
 
 ---
 
 ## API
 
-| Method    | Endpoint      | Description         |
-| --------- | ------------- | ------------------- |
-| GET       | `/`           | Dashboard UI        |
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | Dashboard UI |
 | WebSocket | `/ws/monitor` | Live metrics stream |
 
 ---
 
-## Project Structure
+## Metrics Payload
 
-```text
-syspulse/
-├── app/
-│   ├── main.py
-│   ├── metrics.py
-│   └── ws.py
-├── static/
-│   └── index.html
-├── screenshots/
-│   ├── i1.png
-│   └── i2.png
-├── tests/
-│   └── test_metrics.py
-├── Dockerfile
-├── pyproject.toml
-├── uv.lock
-└── README.md
+```json
+{
+  "system": { "hostname": "fedora", "os": "Linux", "uptime": "9h 7m" },
+  "cpu": { "overall": 3.43, "cores": [2.0, 5.0], "count": 12 },
+  "memory": { "total": 15.01, "used": 4.36, "available": 10.64, "percent": 29.1 },
+  "disk": { "total": 463.17, "used": 54.95, "available": 407.12, "percent": 11.9 },
+  "network": { "mb_sent": 2.39, "mb_received": 28.67, "upload_kb": 1.66, "download_kb": 0.82 },
+  "processes": [{ "pid": 6200, "name": "firefox", "cpu_percent": 0.86, "memory_percent": 4.87 }]
+}
 ```
+
+---
+
+## Project Structure
+syspulse/
+
+├── app/
+
+│   ├── main.py        # FastAPI app, routes, lifespan
+
+│   ├── metrics.py     # psutil metric collection
+
+│   └── ws.py          # WebSocket handler
+
+├── static/
+
+│   └── index.html     # dashboard — HTML + CSS + JS
+
+├── tests/
+
+│   └── test_metrics.py
+
+├── Dockerfile
+
+├── pyproject.toml
+
+├── uv.lock
+
+└── README.md
 
 ---
 
 ## Roadmap
 
-* [x] CPU Monitoring
-* [x] Memory Monitoring
-* [x] Disk Monitoring
-* [x] Network Monitoring
-* [x] Process Monitoring
-* [x] Docker Image
-* [ ] Historical Metrics Storage
-* [ ] Alert System
-* [ ] GPU Monitoring
-* [ ] Container Monitoring
+- [x] CPU monitoring — overall + per core
+- [x] Memory monitoring
+- [x] Disk monitoring
+- [x] Network monitoring — live KB/s + history graph
+- [x] Process monitoring — top 10 by CPU
+- [x] System info — hostname, OS, uptime
+- [x] Color-coded thresholds
+- [x] Docker / Podman image
+- [ ] Historical metrics storage (PostgreSQL)
+- [ ] Alert system (CPU > 90% → notify)
+- [ ] GPU monitoring
+- [ ] Multi-machine monitoring
 
 ---
 
@@ -139,16 +150,12 @@ syspulse/
 docker pull yashg0/syspulse:latest
 ```
 
-Docker Hub:
-https://hub.docker.com/r/yashg0/syspulse
+[hub.docker.com/r/yashg0/syspulse](https://hub.docker.com/r/yashg0/syspulse)
 
 ---
 
 ## Author
 
-**Yash G**
-
-GitHub:
-https://github.com/yashg0
+**Yash G** — [github.com/yashg0](https://github.com/yashg0)
 
 MIT License
