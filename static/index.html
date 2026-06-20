@@ -231,6 +231,20 @@
         <header>
             <h1>⚡ SysPulse</h1>
             <span id="status">Connecting...</span>
+            <div
+                id="sys-info"
+                style="
+                    margin-left: auto;
+                    display: flex;
+                    gap: 1.5rem;
+                    font-size: 12px;
+                    color: #8b949e;
+                "
+            >
+                <span id="sys-hostname"></span>
+                <span id="sys-os"></span>
+                <span id="sys-uptime"></span>
+            </div>
         </header>
 
         <div class="layout">
@@ -488,6 +502,13 @@
 
             ws.onmessage = (event) => {
                 const d = JSON.parse(event.data);
+
+                document.getElementById("sys-hostname").textContent =
+                    "host: " + d.system.hostname;
+                document.getElementById("sys-os").textContent =
+                    "os: " + d.system.os + " " + d.system.os_version;
+                document.getElementById("sys-uptime").textContent =
+                    "uptime: " + d.system.uptime;
 
                 uploadHistory.push(d.network.upload_kb);
                 uploadHistory.shift();

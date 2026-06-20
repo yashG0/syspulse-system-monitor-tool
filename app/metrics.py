@@ -1,3 +1,5 @@
+import platform
+import socket
 import time
 from typing import Any
 
@@ -10,6 +12,20 @@ def bytes_to_gb(b: int) -> float:
 
 def bytes_to_mb(b: int) -> float:
     return round(b / (1024**2), 2)
+
+
+def get_system_info() -> dict[str, Any]:
+    uptime_seconds = int(time.time() - psutil.boot_time())
+    hours = uptime_seconds // 3600
+    minutes = (uptime_seconds % 3600) // 60
+
+    return {
+        "hostname": socket.gethostname(),
+        "os": platform.system(),
+        "os_version": platform.release(),
+        "uptime": f"{hours}h {minutes}m",
+        "cpu_model": platform.processor() or "Unknown",
+    }
 
 
 def get_cpu_usage() -> dict[str, Any]:
@@ -62,7 +78,7 @@ def get_network() -> dict[str, Any]:
             "download_kb": 0.0,
         }
 
-    elapsed = now - _last_net_time
+    elapsed = now - _last_net_time  # type:ignore
     upload_kb = round((current.bytes_sent - _last_net.bytes_sent) / elapsed / 1024, 2)
     download_kb = round((current.bytes_recv - _last_net.bytes_recv) / elapsed / 1024, 2)
 
@@ -100,7 +116,8 @@ def get_top_processes(limit: int = 10) -> list[dict[str, Any]]:
 
 def get_all_metrics() -> dict[str, Any]:
     return {
-        "cpu": get_cpu_usage(),  # now a dict, not a float
+        "system": get_system_info(),
+        "cpu": get_cpu_usage(),
         "memory": get_memory(),
         "disk": get_disk(),
         "network": get_network(),
