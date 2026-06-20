@@ -1,3 +1,4 @@
+import time
 from typing import Any
 
 import psutil
@@ -41,11 +42,38 @@ def get_disk() -> dict[str, Any]:
     }
 
 
+_last_net = None
+_last_net_time = None
+
+
 def get_network() -> dict[str, Any]:
-    net = psutil.net_io_counters()
+    global _last_net, _last_net_time
+
+    current = psutil.net_io_counters()
+    now = time.time()
+
+    if _last_net is None:
+        _last_net = current
+        _last_net_time = now
+        return {
+            "mb_sent": bytes_to_mb(current.bytes_sent),
+            "mb_received": bytes_to_mb(current.bytes_recv),
+            "upload_kb": 0.0,
+            "download_kb": 0.0,
+        }
+
+    elapsed = now - _last_net_time
+    upload_kb = round((current.bytes_sent - _last_net.bytes_sent) / elapsed / 1024, 2)
+    download_kb = round((current.bytes_recv - _last_net.bytes_recv) / elapsed / 1024, 2)
+
+    _last_net = current
+    _last_net_time = now
+
     return {
-        "mb_sent": bytes_to_mb(net.bytes_sent),
-        "mb_received": bytes_to_mb(net.bytes_recv),
+        "mb_sent": bytes_to_mb(current.bytes_sent),
+        "mb_received": bytes_to_mb(current.bytes_recv),
+        "upload_kb": upload_kb,
+        "download_kb": download_kb,
     }
 
 
